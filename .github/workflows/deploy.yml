@@ -23,16 +23,16 @@ jobs:
 
       - name: Deploy Serverless Container
         run: |
-          # Устанавливаем YC CLI для управления контейнером
           curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
           export PATH=$PATH:/home/runner/yandex-cloud/bin
           
-          # Авторизуемся через тот же ключ
           echo '${{ secrets.YC_SA_JSON_KEY }}' > sa_key.json
           yc config set service-account-key sa_key.json
-          
-          # Создаем новую ревизию контейнера (или создаем сам контейнер, если его нет)
-          # Замени 'my-proxy-container' на имя, которое ты хочешь
+
+          # Устанавливаем контекст каталога
+          yc config set folder-id b1g08mvrjqt5o2fg6oso
+
+          # Деплоим ревизию
           yc serverless container revision deploy \
             --container-name my-proxy-container \
             --image cr.yandex/crp05sipubrj79k08hta/proxy-bridge:latest \
@@ -40,4 +40,5 @@ jobs:
             --memory 256MB \
             --concurrency 50 \
             --execution-timeout 60s \
-            --service-account-id ajedis5su2hi66198g4r
+            --service-account-id ajedis5su2hi66198g4r \
+            --make-public
