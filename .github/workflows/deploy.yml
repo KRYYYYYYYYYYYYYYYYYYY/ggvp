@@ -1,7 +1,7 @@
 name: Deploy Proxy to YC
 on:
   push:
-    branches: [ main ]
+    branches: [ main ] # Убедись, что твоя ветка называется main, а не master
 
 jobs:
   build-and-deploy:
@@ -17,10 +17,27 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t cr.yandex/ID_ТВОЕГО_РЕЕСТРА/proxy-bridge:latest .
-          docker push cr.yandex/ID_ТВОЕГО_РЕЕСТРА/proxy-bridge:latest
+          # Собираем образ и пушим в твой реестр
+          docker build -t cr.yandex/crp05sipubrj79k08hta/proxy-bridge:latest .
+          docker push cr.yandex/crp05sipubrj79k08hta/proxy-bridge:latest
 
       - name: Deploy Serverless Container
         run: |
-          # Тут можно добавить команду yc serverless container revision deploy, 
-          # но проще первый раз создать контейнер руками в консоли YC
+          # Устанавливаем YC CLI для управления контейнером
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+          export PATH=$PATH:/home/runner/yandex-cloud/bin
+          
+          # Авторизуемся через тот же ключ
+          echo '${{ secrets.YC_SA_JSON_KEY }}' > sa_key.json
+          yc config set service-account-key sa_key.json
+          
+          # Создаем новую ревизию контейнера (или создаем сам контейнер, если его нет)
+          # Замени 'my-proxy-container' на имя, которое ты хочешь
+          yc serverless container revision deploy \
+            --container-name my-proxy-container \
+            --image cr.yandex/crp05sipubrj79k08hta/proxy-bridge:latest \
+            --cores 1 \
+            --memory 256MB \
+            --concurrency 50 \
+            --execution-timeout 60s \
+            --service-account-id ajedis5su2hi66198g4r
