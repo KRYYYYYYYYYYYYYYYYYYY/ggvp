@@ -1,0 +1,26 @@
+name: Deploy Proxy to YC
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Login to YC Registry
+        uses: yc-actions/yc-cr-login@v1
+        with:
+          yc-sa-json-credentials: ${{ secrets.YC_SA_JSON_KEY }}
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t cr.yandex/ID_ТВОЕГО_РЕЕСТРА/proxy-bridge:latest .
+          docker push cr.yandex/ID_ТВОЕГО_РЕЕСТРА/proxy-bridge:latest
+
+      - name: Deploy Serverless Container
+        run: |
+          # Тут можно добавить команду yc serverless container revision deploy, 
+          # но проще первый раз создать контейнер руками в консоли YC
