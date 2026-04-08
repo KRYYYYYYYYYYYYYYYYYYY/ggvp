@@ -30,12 +30,11 @@ jobs:
           yc config set service-account-key sa_key.json
           yc config set folder-id b1g08mvrjqt5o2fg6oso
 
-          # Теперь имя совпадает с тем, что в Облаке
           yc serverless container revision deploy \
             --container-name vless-bridge \
             --image cr.yandex/crp05sipubrj79k08hta/proxy-bridge:latest \
             --cores 1 \
             --memory 256MB \
-            --concurrency 50 \
+            --concurrency 16 \
             --execution-timeout 60s \
             --service-account-id ajedis5su2hi66198g4r
